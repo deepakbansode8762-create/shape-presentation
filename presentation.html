@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Shape Program - Abstract Classes & Polymorphism</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            overflow-x: hidden;
+            color: #333;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            width: 90%;
+            max-width: 1400px;
+            min-height: 85vh;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            padding: 50px 60px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            display: none;
+            position: absolute;
+            opacity: 0;
+            transform: translateX(150px) scale(0.95);
+            transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            z-index: 10;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(30, 60, 114, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(126, 34, 206, 0.6);
+            }
+        }
+
+        h1 {
+            font-size: 3.8em;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-out;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #1e3c72 0%, #7e22ce 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 30px 0 25px 0;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 2em;
+            color: #2a5298;
+            margin: 25px 0 15px 0;
+            animation: fadeInUp 1s ease-out 0.4s backwards;
+            font-weight: 600;
+        }
+
+        .content {
+            font-size: 1.25em;
+            line-height: 1.9;
+            color: #444;
+            animation: fadeInUp 1s ease-out 0.6s backwards;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 30px;
+            border-radius: 12px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 1em;
+            overflow-x: auto;
+            margin: 25px 0;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease-out 0.8s backwards, glow 3s ease-in-out infinite;
+            position: relative;
+            border-left: 4px solid #7e22ce;
+        }
+
+        .code-block::before {
+            content: 'JAVA';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 0.7em;
+            opacity: 0.4;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .code-block .keyword {
+            color: #569cd6;
+        }
+
+        .code-block .string {
+            color: #ce9178;
+        }
+
+        .code-block .comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+
+        .code-block .method {
+            color: #dcdcaa;
+        }
+
+        .code-block .number {
+            color: #b5cea8;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 18px 20px;
+            margin: 12px 0;
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.08) 0%, rgba(126, 34, 206, 0.08) 100%);
+            border-left: 5px solid #2a5298;
+            border-radius: 10px;
+            animation: slideInLeft 0.6s ease-out backwards;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+
+        .feature-list li:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left-color: #7e22ce;
+        }
+
+        .feature-list li:nth-child(1) { animation-delay: 0.1s; }
+        .feature-list li:nth-child(2) { animation-delay: 0.2s; }
+        .feature-list li:nth-child(3) { animation-delay: 0.3s; }
+        .feature-list li:nth-child(4) { animation-delay: 0.4s; }
+        .feature-list li:nth-child(5) { animation-delay: 0.5s; }
+        .feature-list li:nth-child(6) { animation-delay: 0.6s; }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .slide-indicator {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .indicator.active {
+            background: white;
+            transform: scale(1.4);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(255, 235, 59, 0.4) 0%, rgba(255, 235, 59, 0.4) 100%);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .visual-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .shape-box {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1) 0%, rgba(126, 34, 206, 0.1) 100%);
+            border-radius: 15px;
+            border: 3px solid #2a5298;
+            min-width: 250px;
+            animation: fadeInUp 1s ease-out backwards;
+            transition: all 0.3s ease;
+        }
+
+        .shape-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border-color: #7e22ce;
+        }
+
+        .circle-visual {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .triangle-visual {
+            width: 0;
+            height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 104px solid #7e22ce;
+            margin: 0 auto 15px;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .output-box {
+            background: #1e1e1e;
+            color: #0f0;
+            padding: 25px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 1.1em;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #0f0;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1) 0%, rgba(126, 34, 206, 0.1) 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #7e22ce;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 2em;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px;
+                width: 95%;
+            }
+
+            h1 {
+                font-size: 2.2em;
+            }
+
+            h2 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                font-size: 1.1em;
+            }
+
+            .code-block {
+                font-size: 0.85em;
+                padding: 20px;
+            }
+
+            .visual-diagram {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="logo">⚡</div>
+            <h1>Java Shape Program</h1>
+            <h2 style="font-size: 2.2em; margin-top: 10px;">Abstract Classes & Polymorphism</h2>
+            <div style="text-align: center; margin-top: 50px; font-size: 1.3em; color: #666;">
+                <p><span class="highlight">Shape_peri_area_Main.java</span></p>
+                <p style="margin-top: 20px;">Implementation of Abstract Classes with Circle and Triangle</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problem Statement -->
+        <div class="slide">
+            <h2><span class="icon">📋</span>Problem Statement</h2>
+            <div class="content">
+                <p style="margin-bottom: 25px; font-size: 1.3em;">
+                    Develop a <span class="highlight">JAVA program</span> that demonstrates object-oriented programming concepts.
+                </p>
+                <ul class="feature-list">
+                    <li>📐 Create an <strong>abstract class</strong> named <code>Shape</code></li>
+                    <li>🔷 Define two <strong>abstract methods</strong>: <code>calculateArea()</code> and <code>calculatePerimeter()</code></li>
+                    <li>⭕ Create a <strong>Circle</strong> subclass extending <code>Shape</code></li>
+                    <li>🔺 Create a <strong>Triangle</strong> subclass extending <code>Shape</code></li>
+                    <li>💻 Implement methods to calculate area and perimeter for each shape</li>
+                    <li>🚀 Demonstrate polymorphism in the main method</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 3: Abstract Class Concept -->
+        <div class="slide">
+            <h2><span class="icon">🎯</span>Abstract Classes</h2>
+            <div class="content">
+                <p style="margin-bottom: 25px;">
+                    An <span class="highlight">abstract class</span> cannot be instantiated but provides a blueprint for subclasses.
+                </p>
+                <ul class="feature-list">
+                    <li>✅ Can contain both abstract and concrete methods</li>
+                    <li>✅ Forces subclasses to implement abstract methods</li>
+                    <li>✅ Enables code reusability and polymorphism</li>
+                    <li>✅ Provides a common interface for related classes</li>
+                </ul>
+                <div class="code-block">
+<span class="keyword">abstract class</span> <span class="method">Shape</span> {
+    <span class="comment">// Abstract methods - must be implemented by subclasses</span>
+    <span class="keyword">public abstract double</span> <span class="method">calculateArea</span>();
+    <span class="keyword">public abstract double</span> <span class="method">calculatePerimeter</span>();
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Circle Class Implementation -->
+        <div class="slide">
+            <h2><span class="icon">⭕</span>Circle Class Implementation</h2>
+            <div class="content">
+                <div class="code-block">
+<span class="keyword">class</span> <span class="method">Circle</span> <span class="keyword">extends</span> <span class="method">Shape</span> {
+    <span class="keyword">private double</span> radius;
+    
+    <span class="comment">// Constructor</span>
+    <span class="keyword">public</span> <span class="method">Circle</span>(<span class="keyword">double</span> radius) {
+        <span class="keyword">this</span>.radius = radius;
+    }
+    
+    <span class="keyword">@Override</span>
+    <span class="keyword">public double</span> <span class="method">calculateArea</span>() {
+        <span class="keyword">return</span> Math.<span class="method">PI</span> * radius * radius;
+    }
+    
+    <span class="keyword">@Override</span>
+    <span class="keyword">public double</span> <span class="method">calculatePerimeter</span>() {
+        <span class="keyword">return</span> <span class="number">2</span> * Math.<span class="method">PI</span> * radius;
+    }
+}
+                </div>
+                <div class="formula-box">
+                    <strong>Area = π × r²</strong><br>
+                    <strong>Perimeter = 2π × r</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Triangle Class Implementation -->
+        <div class="slide">
+            <h2><span class="icon">🔺</span>Triangle Class Implementation</h2>
+            <div class="content">
+                <div class="code-block">
+<span class="keyword">class</span> <span class="method">Triangle</span> <span class="keyword">extends</span> <span class="method">Shape</span> {
+    <span class="keyword">private double</span> side1, side2, side3;
+    
+    <span class="comment">// Constructor</span>
+    <span class="keyword">public</span> <span class="method">Triangle</span>(<span class="keyword">double</span> side1, <span class="keyword">double</span> side2, <span class="keyword">double</span> side3) {
+        <span class="keyword">this</span>.side1 = side1;
+        <span class="keyword">this</span>.side2 = side2;
+        <span class="keyword">this</span>.side3 = side3;
+    }
+    
+    <span class="keyword">@Override</span>
+    <span class="keyword">public double</span> <span class="method">calculateArea</span>() {
+        <span class="keyword">double</span> s = (side1 + side2 + side3) / <span class="number">2</span>; <span class="comment">// Semi-perimeter</span>
+        <span class="keyword">return</span> Math.<span class="method">sqrt</span>(s * (s - side1) * (s - side2) * (s - side3)); <span class="comment">// Heron's formula</span>
+    }
+    
+    <span class="keyword">@Override</span>
+    <span class="keyword">public double</span> <span class="method">calculatePerimeter</span>() {
+        <span class="keyword">return</span> side1 + side2 + side3;
+    }
+}
+                </div>
+                <div class="formula-box">
+                    <strong>Area = √[s(s-a)(s-b)(s-c)]</strong> where s = (a+b+c)/2 (Heron's Formula)<br>
+                    <strong>Perimeter = a + b + c</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Complete Main Class -->
+        <div class="slide">
+            <h2><span class="icon">💻</span>Complete Main Class</h2>
+            <div class="content">
+                <div class="code-block">
+<span class="keyword">public class</span> <span class="method">Shape_peri_area_Main</span> {
+    <span class="keyword">public static void</span> <span class="method">main</span>(<span class="keyword">String</span>[] args) {
+        <span class="comment">// Create Circle object with radius 5.0</span>
+        <span class="method">Circle</span> circle = <span class="keyword">new</span> <span class="method">Circle</span>(<span class="number">5.0</span>);
+        
+        <span class="comment">// Create Triangle object with sides 3.0, 4.0, 5.0</span>
+        <span class="method">Triangle</span> triangle = <span class="keyword">new</span> <span class="method">Triangle</span>(<span class="number">3.0</span>, <span class="number">4.0</span>, <span class="number">5.0</span>);
+        
+        <span class="comment">// Display Circle information</span>
+        System.<span class="keyword">out</span>.<span class="method">println</span>(<span class="string">"Circle:"</span>);
+        System.<span class="keyword">out</span>.<span class="method">println</span>(<span class="string">"Area: "</span> + circle.<span class="method">calculateArea</span>());
+        System.<span class="keyword">out</span>.<span class="method">println</span>(<span class="string">"Perimeter: "</span> + circle.<span class="method">calculatePerimeter</span>());
+        System.<span class="keyword">out</span>.<span class="method">println</span>();
+        
+        <span class="comment">// Display Triangle information</span>
+        System.<span class="keyword">out</span>.<span class="method">println</span>(<span class="string">"Triangle:"</span>);
+        System.<span class="keyword">out</span>.<span class="method">println</span>(<span class="string">"Area: "</span> + triangle.<span class="method">calculateArea</span>());
+        System.<span class="keyword">out</span>.<span class="method">println</span>(<span class="string">"Perimeter: "</span> + triangle.<span class="method">calculatePerimeter</span>());
+    }
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Program Output -->
+        <div class="slide">
+            <h2><span class="icon">📊</span>Program Output</h2>
+            <div class="content">
+                <h3>Execution Result:</h3>
+                <div class="output-box">
+Circle:
+Area: 78.53981633974483
+Perimeter: 31.41592653589793
+
+Triangle:
+Area: 6.0
+Perimeter: 12.0
+                </div>
+                <div style="margin-top: 30px;">
+                    <h3>Calculation Breakdown:</h3>
+                    <ul class="feature-list">
+                        <li><strong>Circle (r=5.0):</strong> Area = π × 5² = 78.54 | Perimeter = 2π × 5 = 31.42</li>
+                        <li><strong>Triangle (3,4,5):</strong> Area = 6.0 (right triangle) | Perimeter = 3+4+5 = 12.0</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Visual Representation -->
+        <div class="slide">
+            <h2><span class="icon">🎨</span>Visual Representation</h2>
+            <div class="visual-diagram">
+                <div class="shape-box">
+                    <div class="circle-visual">⭕</div>
+                    <h3>Circle</h3>
+                    <p><strong>Radius:</strong> 5.0</p>
+                    <p><strong>Area:</strong> 78.54</p>
+                    <p><strong>Perimeter:</strong> 31.42</p>
+                </div>
+                <div class="shape-box">
+                    <div class="triangle-visual"></div>
+                    <h3>Triangle</h3>
+                    <p><strong>Sides:</strong> 3, 4, 5</p>
+                    <p><strong>Area:</strong> 6.0</p>
+                    <p><strong>Perimeter:</strong> 12.0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Key Concepts Demonstrated -->
+        <div class="slide">
+            <h2><span class="icon">🔑</span>Key OOP Concepts</h2>
+            <div class="content">
+                <ul class="feature-list">
+                    <li><strong>📦 Abstraction:</strong> Abstract class defines structure without implementation</li>
+                    <li><strong>🔄 Inheritance:</strong> Circle and Triangle extend the Shape class</li>
+                    <li><strong>🎭 Polymorphism:</strong> Same method names with different implementations</li>
+                    <li><strong>🔒 Encapsulation:</strong> Private fields with public methods</li>
+                    <li><strong>✍️ Method Overriding:</strong> @Override annotation ensures correct implementation</li>
+                    <li><strong>🏗️ Code Reusability:</strong> Common interface reduces code duplication</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 10: Real-World Example -->
+        <div class="slide">
+            <h2><span class="icon">🌍</span>Real-World Applications</h2>
+            <div class="content">
+                <ul class="feature-list">
+                    <li>🎮 <strong>Game Development:</strong> Different shapes with common behavior</li>
+                    <li>📐 <strong>CAD Software:</strong> Unified interface for geometric calculations</li>
+                    <li>📊 <strong>Graphics Libraries:</strong> Polymorphic rendering of shapes</li>
+                    <li>🧮 <strong>Mathematical Software:</strong> Extensible shape calculation system</li>
+                    <li>🎨 <strong>Design Tools:</strong> Consistent API for various geometric objects</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 11: Extensibility Example -->
+        <div class="slide">
+            <h2><span class="icon">🚀</span>Extending the Program</h2>
+            <div class="content">
+                <p style="margin-bottom: 20px;">You can easily add more shapes by extending the Shape class:</p>
+                <div class="code-block">
+<span class="comment">// Adding a Rectangle class</span>
+<span class="keyword">class</span> <span class="method">Rectangle</span> <span class="keyword">extends</span> <span class="method">Shape</span> {
+    <span class="keyword">private double</span> length, width;
+    
+    <span class="keyword">public</span> <span class="method">Rectangle</span>(<span class="keyword">double</span> length, <span class="keyword">double</span> width) {
+        <span class="keyword">this</span>.length = length;
+        <span class="keyword">this</span>.width = width;
+    }
+    
+    <span class="keyword">@Override</span>
+    <span class="keyword">public double</span> <span class="method">calculateArea</span>() {
+        <span class="keyword">return</span> length * width;
+    }
+    
+    <span class="keyword">@Override</span>
+    <span class="keyword">public double</span> <span class="method">calculatePerimeter</span>() {
+        <span class="keyword">return</span> <span class="number">2</span> * (length + width);
+    }
+}
+                </div>
+                <p style="margin-top: 20px;">The abstract class design makes it easy to add new shapes without modifying existing code!</p>
+            </div>
+        </div>
+
+        <!-- Slide 12: Benefits -->
+        <div class="slide">
+            <h2><span class="icon">✨</span>Benefits of This Design</h2>
+            <div class="content">
+                <ul class="feature-list">
+                    <li>🔧 <strong>Maintainability:</strong> Changes to base class affect all subclasses</li>
+                    <li>📈 <strong>Scalability:</strong> Easy to add new shapes without breaking existing code</li>
+                    <li>🎯 <strong>Type Safety:</strong> Compiler enforces method implementation</li>
+                    <li>🧩 <strong>Modularity:</strong> Each shape is self-contained</li>
+                    <li>🔄 <strong>Flexibility:</strong> Can work with Shape references (polymorphism)</li>
+                    <li>📚 <strong>Code Clarity:</strong> Clear inheritance hierarchy</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 13: Thank You -->
+        <div class="slide">
+            <div style="text-align: center; margin-top: 100px;">
+                <div class="logo" style="font-size: 6em;">🎓</div>
+                <h1 style="font-size: 4.5em; margin-top: 30px;">Thank You!</h1>
+                <div class="content" style="font-size: 1.5em; margin-top: 50px; color: #666;">
+                    <p>Java Shape Program</p>
+                    <p style="margin-top: 20px; font-size: 0.9em;">Abstract Classes & Polymorphism</p>
+                    <p style="margin-top: 40px; font-size: 0.7em; color: #999;">Questions & Discussion</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-indicator">
+        <div class="indicator active" onclick="goToSlide(0)"></div>
+        <div class="indicator" onclick="goToSlide(1)"></div>
+        <div class="indicator" onclick="goToSlide(2)"></div>
+        <div class="indicator" onclick="goToSlide(3)"></div>
+        <div class="indicator" onclick="goToSlide(4)"></div>
+        <div class="indicator" onclick="goToSlide(5)"></div>
+        <div class="indicator" onclick="goToSlide(6)"></div>
+        <div class="indicator" onclick="goToSlide(7)"></div>
+        <div class="indicator" onclick="goToSlide(8)"></div>
+        <div class="indicator" onclick="goToSlide(9)"></div>
+        <div class="indicator" onclick="goToSlide(10)"></div>
+        <div class="indicator" onclick="goToSlide(11)"></div>
+        <div class="indicator" onclick="goToSlide(12)"></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="previousSlide()">← Previous</button>
+        <button class="btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const indicators = document.querySelectorAll('.indicator');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            indicators[currentSlide].classList.remove('active');
+            
+            currentSlide = (n + totalSlides) % totalSlides;
+            
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function goToSlide(n) {
+            showSlide(n);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                goToSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                goToSlide(totalSlides - 1);
+            }
+        });
+
+        // Touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+
+        // Auto-scroll to top when slide changes
+        const presentation = document.querySelector('.presentation');
+        function scrollToTop() {
+            presentation.scrollTop = 0;
+        }
+
+        const originalShowSlide = showSlide;
+        showSlide = function(n) {
+            originalShowSlide(n);
+            setTimeout(scrollToTop, 100);
+        };
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
